@@ -2,6 +2,7 @@ package com.example.people.controllers;
 
 import com.example.people.dao.PersonDAO;
 import com.example.people.models.Person;
+import com.example.people.util.PersonValidator;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,8 +14,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/people")
 public class PeopleController {
 
-    @Autowired
+
     private PersonDAO personDAO;
+
+    private final PersonValidator personValidator;
+
+    @Autowired
+    public PeopleController(PersonDAO personDAO, PersonValidator personValidator) {
+        this.personDAO = personDAO;
+        this.personValidator = personValidator;
+    }
 
     @GetMapping()
     public String index(Model model) {
@@ -37,6 +46,8 @@ public class PeopleController {
     @PostMapping
     public String create(@ModelAttribute("person") @Valid Person person,
                          BindingResult bindingResult) {
+        personValidator.validate(person, bindingResult);
+
         if (bindingResult.hasErrors()) {
             return "people/new";
         }
